@@ -1,12 +1,6 @@
-# `shiva-connector`
+# `Control System Context Protocol`
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Crates.io](https://img.shields.io/crates/v/shiva-connector.svg)](https://crates.io/crates/shiva-connector)
-[![Documentation](https://docs.rs/shiva-connector/badge.svg)](https://docs.rs/shiva-connector)
-[![PyPI](https://img.shields.io/pypi/v/shiva-connector.svg)](https://pypi.org/project/shiva-connector/)
-[![ROS 2 Humble](https://img.shields.io/badge/ROS_2-Humble-blueviolet.svg)](https://docs.ros.org/)
-[![IPC Latency](https://img.shields.io/badge/IPC_Latency-%3C10%CE%BCs-success.svg)](#)
 
 ---
 
