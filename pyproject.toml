@@ -1,0 +1,23 @@
+[build-system]
+requires = ["maturin>=1.0,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "cscp-connector"
+version = "0.2.0"
+description = "Control-System-Context-Protocol: Universal Zero-Copy C-ABI Shared Memory Data Plane for Robotics & RL"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Aditya", email = "aditya@cscp.ai" }]
+classifiers = [
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+[tool.maturin]
+features = ["python"]
+python-source = "python"
+module-name = "cscp_connector.cscp_connector"
