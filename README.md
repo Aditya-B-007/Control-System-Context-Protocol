@@ -1,7 +1,6 @@
 # `Control-System-Context-Protocol`
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![PyPI](https://img.shields.io/pypi/v/cscp-connector.svg)](https://pypi.org/project/cscp-connector/)
 [![ROS 2 Humble](https://img.shields.io/badge/ROS_2-Humble-blueviolet.svg)](https://docs.ros.org/)
 [![IPC Latency](https://img.shields.io/badge/IPC_Latency-%3C10%CE%BCs-success.svg)](#)
 
