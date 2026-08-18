@@ -7,7 +7,7 @@ description = "Control-System-Context-Protocol: Universal Zero-Copy C-ABI Shared
 license = "Apache-2.0"
 repository = "https://github.com/aditya/Control-System-Context-Protocol"
 readme = "README.md"
-keywords = ["robotics", "reinforcement-learning", "ipc", "shared-memory", "c-abi"]
+keywords = ["robotics", "rl", "ipc", "shared-memory", "c-abi"]
 categories = ["hardware-support", "science", "concurrency"]
 
 [lib]
