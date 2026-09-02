@@ -11,6 +11,10 @@ pub enum CscpStatusCode {
     BufferTooSmall = -4,
     ShmAccessError = -5,
     PoisonedLock = -6,
+    QueueFull = -7,
+    ShmOpenFailed = -8,
+    ShmMapFailed = -9,
+    RateLimited = -10,
     UnknownError = -99,
 }
 
@@ -30,6 +34,18 @@ pub enum CscpError {
 
     #[error("Shared memory access error: {0}")]
     ShmAccessError(String),
+
+    #[error("Queue is full, frame dropped")]
+    QueueFull,
+
+    #[error("Failed to open shared memory region: {0}")]
+    ShmOpenFailed(String),
+
+    #[error("Failed to map shared memory region: {0}")]
+    ShmMapFailed(String),
+
+    #[error("Rate limited by leaky bucket")]
+    RateLimited,
 }
 
 impl From<CscpError> for CscpStatusCode {
@@ -40,6 +56,10 @@ impl From<CscpError> for CscpStatusCode {
             CscpError::NullPointer(_) => CscpStatusCode::NullPointer,
             CscpError::BufferTooSmall { .. } => CscpStatusCode::BufferTooSmall,
             CscpError::ShmAccessError(_) => CscpStatusCode::ShmAccessError,
+            CscpError::QueueFull => CscpStatusCode::QueueFull,
+            CscpError::ShmOpenFailed(_) => CscpStatusCode::ShmOpenFailed,
+            CscpError::ShmMapFailed(_) => CscpStatusCode::ShmMapFailed,
+            CscpError::RateLimited => CscpStatusCode::RateLimited,
         }
     }
 }

@@ -1,16 +1,56 @@
-# 64-Byte Cache Alignment & Shared Memory Layout
+# CSCP v0.3 Shared Memory Layout
 
-| Field Name | Offset | Data Type | Dimensions | Description |
+## Region Structure
+
+The entire POSIX shared memory region is a single `ShmLayout<N>` struct:
+
+```
+┌─────────────────────────────────────────────────────┐
+│ CscpShmHeader        (64 bytes, aligned to 64)      │
+├─────────────────────────────────────────────────────┤
+│ SpscQueue<N>: q_env_to_ctrl (OmniSim → Controller)  │
+│   ├── head: AtomicUsize    (64 bytes with padding)  │
+│   ├── tail: AtomicUsize    (64 bytes with padding)  │
+│   └── slots: [CscpFrame; N]                         │
+├─────────────────────────────────────────────────────┤
+│ SpscQueue<N>: q_ctrl_to_env (Controller → OmniSim)  │
+│   ├── head: AtomicUsize    (64 bytes with padding)  │
+│   ├── tail: AtomicUsize    (64 bytes with padding)  │
+│   └── slots: [CscpFrame; N]                         │
+└─────────────────────────────────────────────────────┘
+```
+
+## Header (64 Bytes)
+
+| Field | Offset | Data Type | Description |
+| --- | --- | --- | --- |
+| **`magic`** | `0x00` | `AtomicU32` | ASCII signature `0x43534350` ("CSCP") |
+| **`abi_version`** | `0x04` | `AtomicU32` | ABI version `0x00030000` (v0.3.0) |
+| **`shutdown`** | `0x08` | `AtomicU8` | 0 = running, 1 = shutting down |
+| **`_pad`** | `0x09` | `[u8; 55]` | Padding to 64-byte cache line boundary |
+
+## CscpFrame (Per-Slot, Aligned to 64)
+
+| Field | Offset (within slot) | Data Type | Size | Description |
 | --- | --- | --- | --- | --- |
-| **`magic_signature`** | `0x00` | `uint32_t` | `0x43534350` | ASCII signature verification (`"CSCP"`). |
-| **`abi_version`** | `0x04` | `uint32_t` | `0x00020000` | Rejects mismatched ABI versions. |
-| **`sequence_counter`** | `0x08` | `uint64_t` | Scalar (Atomic) | Atomic lock-free sequence counter. |
-| **`timestamp_us`** | `0x10` | `uint64_t` | Scalar (Atomic) | Microsecond clock at sensor capture. |
-| **`terminated`** | `0x18` | `uint8_t` | Scalar (`0` or `1`) | True terminal flag $d_t$. |
-| **`truncated`** | `0x19` | `uint8_t` | Scalar (`0` or `1`) | Timeout flag $\tau_t$. |
-| **`reserved_pad`** | `0x1A` | `uint8_t` | 38 Bytes | Padding to align state stack to `0x40`. |
-| **`state_stack`** | `0x40` | `float32_t` | $4 \times 16$ | Observation matrix $\mathbf{S}_{\text{stack}}$. |
-| **`action_stack`** | `0x140` | `float32_t` | $4 \times 4$ | Previously executed actions $\mathbf{a}_{\text{stack}}$. |
-| **`reward_stack`** | `0x180` | `float32_t` | $4 \times 2$ | Multi-objective reward history $\mathbf{r}_{\text{stack}}$. |
-| **`rule_mask`** | `0x1A0` | `uint8_t` | $4 \times 8$ | Active safety mask matrix $\mathbf{m}_{\text{stack}}$. |
-| **`actuation_out`** | `0x1C0` | `float32_t` | $1 \times 4$ | Final control command written by Side B. |
+| **`sequence`** | `0x00` | `u64` | 8 B | Monotonic frame counter |
+| **`timestamp_us`** | `0x08` | `u64` | 8 B | Microsecond timestamp at capture |
+| **`terminated`** | `0x10` | `u8` | 1 B | True terminal flag |
+| **`truncated`** | `0x11` | `u8` | 1 B | Timeout / truncation flag |
+| **`_pad`** | `0x12` | `[u8; 6]` | 6 B | Alignment padding |
+| **`state`** | `0x18` | `[f32; 16]` | 64 B | Observation vector $\mathbf{S}_t$ |
+| **`action`** | `0x58` | `[f32; 4]` | 16 B | Action vector $\mathbf{a}_t$ |
+| **`reward`** | `0x68` | `[f32; 2]` | 8 B | Multi-objective reward $\mathbf{r}_t$ |
+| **`rule_mask`** | `0x70` | `[u8; 8]` | 8 B | Safety mask $\mathbf{m}_t$ |
+
+Total per frame: ~120 bytes (padded to 128 or 192 depending on alignment).
+
+## Default Configuration (N=16)
+
+With the default `ShmLayout<16>`:
+- 16 slots per queue × 2 queues = 32 frame slots
+- Total region size: `size_of::<ShmLayout<16>>()` bytes
+
+## Legacy v0.2 Layout
+
+The v0.2 `CscpSharedMemory` struct remains available in the `shm` module for single-process use. It uses `ABI_VERSION = 0x00020000` and includes history stacks (`HISTORY_LEN = 4`).
